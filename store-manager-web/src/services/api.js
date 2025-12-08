@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const api = axios.create({
-  baseURL: "http://localhost:5083/api", // Verifique se a porta continua 5083
+  baseURL: "https://lukemuke-system.onrender.com/api", // Verifique se a porta continua 5083
 });
 
 // INTERCEPTOR
