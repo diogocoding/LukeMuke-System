@@ -111,3 +111,4 @@ C:\SistemadeVendaDT\StoreManagerApi\bin\Debug\net8.0\Microsoft.IdentityModel.Pro
 C:\SistemadeVendaDT\StoreManagerApi\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
 C:\SistemadeVendaDT\StoreManagerApi\bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll
 C:\SistemadeVendaDT\StoreManagerApi\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll
+C:\SistemadeVendaDT\StoreManagerApi\obj\Debug\net8.0\StoreManagerApi.sourcelink.json
