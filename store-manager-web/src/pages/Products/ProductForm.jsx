@@ -1,42 +1,135 @@
-import { useEffect, useState } from "react"; // <--- useState adicionado
-import { useForm, useFieldArray } from "react-hook-form"; // <--- useFieldArray para listas
+import { useEffect, useState } from "react";
+import { useForm, useFieldArray } from "react-hook-form";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import { ArrowLeft, Save, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Save, Plus, Trash2, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { api } from "../../services/api";
 
+// --- COMPONENTE CARROSSEL (ESTILO INSTAGRAM) ---
+function InstagramCarousel({ images }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Se não tiver imagens, mostra placeholder
+  if (!images || images.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full text-neutral-600 bg-luke-dark">
+        Sem Imagem
+      </div>
+    );
+  }
+
+  const prevSlide = (e) => {
+    e.preventDefault(); // Evita submit do form
+    const isFirstSlide = currentIndex === 0;
+    const newIndex = isFirstSlide ? images.length - 1 : currentIndex - 1;
+    setCurrentIndex(newIndex);
+  };
+
+  const nextSlide = (e) => {
+    e.preventDefault(); // Evita submit do form
+    const isLastSlide = currentIndex === images.length - 1;
+    const newIndex = isLastSlide ? 0 : currentIndex + 1;
+    setCurrentIndex(newIndex);
+  };
+
+  return (
+    <div className="w-full h-full relative group">
+      {/* Imagem de Fundo */}
+      <div
+        style={{ backgroundImage: `url(${images[currentIndex]})` }}
+        className="w-full h-full bg-center bg-cover duration-500"
+      ></div>
+
+      {/* Seta Esquerda */}
+      {images.length > 1 && (
+        <div className="hidden group-hover:block absolute top-[50%] -translate-y-[-50%] left-2 text-2xl rounded-full p-1 bg-black/50 text-white cursor-pointer hover:bg-black/70 transition">
+          <button onClick={prevSlide} type="button">
+            <ChevronLeft size={20} />
+          </button>
+        </div>
+      )}
+
+      {/* Seta Direita */}
+      {images.length > 1 && (
+        <div className="hidden group-hover:block absolute top-[50%] -translate-y-[-50%] right-2 text-2xl rounded-full p-1 bg-black/50 text-white cursor-pointer hover:bg-black/70 transition">
+          <button onClick={nextSlide} type="button">
+            <ChevronRight size={20} />
+          </button>
+        </div>
+      )}
+
+      {/* Bolinhas (Indicadores) */}
+      {images.length > 1 && (
+        <div className="absolute bottom-2 left-0 right-0 flex justify-center py-2 gap-1.5 z-10">
+          {images.map((_, slideIndex) => (
+            <div
+              key={slideIndex}
+              onClick={() => setCurrentIndex(slideIndex)}
+              className={`rounded-full cursor-pointer transition-all duration-300 ${
+                currentIndex === slideIndex
+                  ? "bg-luke-gold w-2 h-2"
+                  : "bg-white/50 w-1.5 h-1.5"
+              }`}
+            ></div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// --- FORMULÁRIO PRINCIPAL ---
 export function ProductForm() {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEditMode = !!id;
 
-  // Configuração do Formulário com suporte a array de variantes
-  const { register, control, handleSubmit, watch, reset, setValue } = useForm({
+  // Estado local para capturar a URL antes de adicionar à lista
+  const [tempUrl, setTempUrl] = useState("");
+
+  const { register, control, handleSubmit, watch, reset, setValue, getValues } = useForm({
     defaultValues: {
       nome: "",
       categoria: "",
       precoCusto: 0,
       precoVenda: 0,
-      fotoUrl: "",
-      variantes: [], // Começa vazio
+      fotos: [], // AGORA É UM ARRAY DE STRINGS
+      variantes: [],
     },
   });
 
-  // Gerenciador da lista de variantes (Adicionar/Remover linhas)
   const { fields, append, remove } = useFieldArray({
     control,
     name: "variantes",
   });
 
-  const fotoUrlPreview = watch("fotoUrl");
+  // Observa o array de fotos para atualizar o preview em tempo real
+  const fotosPreview = watch("fotos");
+
+  // Função para adicionar URL na lista de fotos
+  const handleAddPhoto = () => {
+    if (!tempUrl) return;
+    const currentFotos = getValues("fotos") || [];
+    setValue("fotos", [...currentFotos, tempUrl]);
+    setTempUrl(""); // Limpa o input
+  };
+
+  // Função para remover uma foto específica
+  const handleRemovePhoto = (indexToRemove) => {
+    const currentFotos = getValues("fotos");
+    const newFotos = currentFotos.filter((_, index) => index !== indexToRemove);
+    setValue("fotos", newFotos);
+  };
 
   useEffect(() => {
     if (isEditMode) {
-      // No GET, precisamos pedir para incluir as variantes na busca
-      // Nota: Seu C# precisa incluir .Include(p => p.Variantes) no GetProduto
       api
         .get(`/produtos/${id}`)
         .then((response) => {
           const produto = response.data;
+          // Ajuste de compatibilidade caso o back ainda mande "fotoUrl" simples
+          if (produto.fotoUrl && (!produto.fotos || produto.fotos.length === 0)) {
+            produto.fotos = [produto.fotoUrl];
+          }
           reset(produto);
         })
         .catch(() => alert("Erro ao carregar produto."));
@@ -45,12 +138,15 @@ export function ProductForm() {
 
   const onSubmit = async (data) => {
     try {
-      // Formata os dados numéricos antes de enviar
       const payload = {
         ...data,
         id: isEditMode ? parseInt(id) : 0,
         precoCusto: parseFloat(data.precoCusto),
         precoVenda: parseFloat(data.precoVenda),
+        // Se o back esperar "FotoUrl" (string única), mandamos a primeira da lista
+        fotoUrl: data.fotos.length > 0 ? data.fotos[0] : "", 
+        // Se o back já aceita lista, mandamos "fotos"
+        fotos: data.fotos,
         variantes: data.variantes.map((v) => ({
           ...v,
           quantidadeEstoque: parseInt(v.quantidadeEstoque),
@@ -59,15 +155,15 @@ export function ProductForm() {
 
       if (isEditMode) {
         await api.put(`/produtos/${id}`, payload);
-        alert("Produto e estoque atualizados!");
+        alert("Produto atualizado!");
       } else {
         await api.post("/produtos", payload);
-        alert("Produto cadastrado com variações!");
+        alert("Produto cadastrado!");
       }
       navigate("/products");
     } catch (error) {
       console.error(error);
-      alert("Erro ao salvar. Verifique se o C# está aceitando variantes.");
+      alert("Erro ao salvar. Verifique o console.");
     }
   };
 
@@ -79,7 +175,7 @@ export function ProductForm() {
             {isEditMode ? "Gerenciar Produto" : "Novo Produto"}
           </h1>
           <p className="text-neutral-400 mt-1">
-            Cadastre a peça e suas variações de estoque
+            Cadastre a peça, fotos e variações
           </p>
         </div>
         <Link
@@ -94,7 +190,7 @@ export function ProductForm() {
         onSubmit={handleSubmit(onSubmit)}
         className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8"
       >
-        {/* COLUNA ESQUERDA: DADOS GERAIS */}
+        {/* COLUNA ESQUERDA: DADOS */}
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-luke-card p-6 rounded-xl border border-neutral-800">
             <h2 className="text-luke-gold font-bold mb-4">Dados da Peça</h2>
@@ -107,6 +203,7 @@ export function ProductForm() {
                   placeholder="Ex: Camisa Linho Premium"
                 />
               </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-neutral-300 text-sm">Categoria</label>
@@ -121,15 +218,48 @@ export function ProductForm() {
                     <option value="Acessórios">Acessórios</option>
                   </select>
                 </div>
+
+                {/* --- SEÇÃO DE FOTOS (ATUALIZADA) --- */}
                 <div>
-                  <label className="text-neutral-300 text-sm">URL Foto</label>
-                  <input
-                    {...register("fotoUrl")}
-                    className="w-full bg-luke-dark border border-neutral-700 rounded-lg p-3 text-white"
-                    placeholder="http://..."
-                  />
+                  <label className="text-neutral-300 text-sm">Adicionar Fotos</label>
+                  <div className="flex gap-2">
+                    <input
+                      value={tempUrl}
+                      onChange={(e) => setTempUrl(e.target.value)}
+                      className="w-full bg-luke-dark border border-neutral-700 rounded-lg p-3 text-white"
+                      placeholder="Cole a URL e clique em +"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddPhoto}
+                      className="bg-neutral-800 border border-neutral-700 hover:bg-neutral-700 text-luke-gold px-4 rounded-lg"
+                    >
+                      <Plus />
+                    </button>
+                  </div>
+                  
+                  {/* Lista de miniaturas das URLs adicionadas */}
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {fotosPreview && fotosPreview.map((url, index) => (
+                      <div key={index} className="relative group">
+                        <img 
+                          src={url} 
+                          alt="preview" 
+                          className="w-12 h-12 rounded border border-neutral-700 object-cover" 
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemovePhoto(index)}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition"
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-neutral-300 text-sm">Custo (R$)</label>
@@ -153,7 +283,7 @@ export function ProductForm() {
             </div>
           </div>
 
-          {/* ÁREA DE VARIAÇÕES (ESTOQUE) */}
+          {/* ÁREA DE VARIAÇÕES (Mantida igual) */}
           <div className="bg-luke-card p-6 rounded-xl border border-neutral-800 border-l-4 border-l-luke-gold">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-white font-bold text-lg">
@@ -172,8 +302,7 @@ export function ProductForm() {
 
             {fields.length === 0 && (
               <p className="text-neutral-500 text-sm text-center py-4 border border-dashed border-neutral-800 rounded">
-                Nenhuma variação cadastrada. Clique em adicionar para controlar
-                o estoque.
+                Nenhuma variação cadastrada.
               </p>
             )}
 
@@ -224,24 +353,19 @@ export function ProductForm() {
           </div>
         </div>
 
-        {/* COLUNA DIREITA: PREVIEW */}
+        {/* COLUNA DIREITA: PREVIEW COM CARROSSEL */}
         <div className="space-y-6">
           <div className="bg-luke-card p-6 rounded-xl border border-neutral-800 text-center">
             <h3 className="text-neutral-400 text-sm mb-4">
               Preview da Vitrine
             </h3>
+            {/* CONTAINER DA FOTO/CARROSSEL */}
             <div className="aspect-[3/4] bg-luke-dark rounded-lg overflow-hidden border border-neutral-800 relative group">
-              {fotoUrlPreview ? (
-                <img
-                  src={fotoUrlPreview}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="flex items-center justify-center h-full text-neutral-600">
-                  Sem Imagem
-                </div>
-              )}
-              <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/90 to-transparent p-4 text-left">
+              
+              {/* AQUI ESTÁ O CARROSSEL */}
+              <InstagramCarousel images={fotosPreview} />
+
+              <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/90 to-transparent p-4 text-left pointer-events-none">
                 <p className="text-luke-gold font-bold text-lg">
                   R$ {watch("precoVenda") || "0,00"}
                 </p>
