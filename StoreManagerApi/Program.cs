@@ -47,6 +47,25 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+// --- INÍCIO DO BLOCO NOVO (MIGRATION) ---
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<AppDbContext>();
+        context.Database.Migrate();
+        Console.WriteLine("✅ Banco de dados migrado com sucesso!");
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "❌ Um erro ocorreu durante a migração do banco.");
+    }
+}
+// --- FIM DO BLOCO NOVO ---
+
+
 // Pipeline de Requisição
 if (app.Environment.IsDevelopment())
 {

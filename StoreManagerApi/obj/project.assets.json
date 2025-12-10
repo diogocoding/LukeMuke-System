@@ -3042,11 +3042,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\SistemadeVendaDT\\StoreManagerApi\\StoreManagerApi.csproj",
+      "projectUniqueName": "C:\\Users\\diogo\\Downloads\\loginha2\\LukeMuke-System\\StoreManagerApi\\StoreManagerApi.csproj",
       "projectName": "StoreManagerApi",
-      "projectPath": "C:\\SistemadeVendaDT\\StoreManagerApi\\StoreManagerApi.csproj",
+      "projectPath": "C:\\Users\\diogo\\Downloads\\loginha2\\LukeMuke-System\\StoreManagerApi\\StoreManagerApi.csproj",
       "packagesPath": "C:\\Users\\diogo\\.nuget\\packages\\",
-      "outputPath": "C:\\SistemadeVendaDT\\StoreManagerApi\\obj\\",
+      "outputPath": "C:\\Users\\diogo\\Downloads\\loginha2\\LukeMuke-System\\StoreManagerApi\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\diogo\\AppData\\Roaming\\NuGet\\NuGet.Config"
