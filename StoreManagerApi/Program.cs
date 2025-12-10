@@ -26,9 +26,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 
 // 2. Configuração do JWT (Segurança)
-// Lendo a chave de um lugar seguro (Variáveis de Ambiente do Vercel)
-var jwtKey = builder.Configuration["CHAVE_SECRETA_JWT"]; 
-var key = Encoding.ASCII.GetBytes(jwtKey ?? "CHAVE_RESERVA_CASO_FALHE");
+// SE ELE NÃO CONSEGUIR LER A VARIÁVEL DE AMBIENTE, ELE USA A CHAVE ABAIXO.
+// O CÓDIGO DO VERCEL AGORA TERÁ ESTA CHAVE GARANTIDA.
+var chaveSecreta = builder.Configuration["CHAVE_SECRETA_JWT"]; 
+var key = Encoding.ASCII.GetBytes(chaveSecreta ?? "ESTA_E_UMA_CHAVE_MUITO_SECRETA_DO_LUKE_MUKE_SYSTEM_2025");
+
 builder.Services.AddAuthentication(x =>
 {
     x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
