@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Collections.Generic;
-using System.Text.Json.Serialization; // Necessário para evitar loops no JSON
+using System.Text.Json.Serialization;
 
 namespace StoreManagerApi.Models;
 
@@ -18,9 +18,12 @@ public class Produto
     [Column(TypeName = "decimal(18,2)")]
     public decimal PrecoVenda { get; set; }
     
-    // CORREÇÃO 1: Adicionei o '?' para dizer que a foto pode ser nula (sem foto)
+    // Mantemos esse campo para ser a "Capa" do produto (a primeira foto)
     public string? FotoUrl { get; set; } 
     
-    // CORREÇÃO 2: Relacionamento com Variantes
+    // NOVA LISTA: Onde ficam todas as fotos do carrossel
+    public List<ProdutoFoto> Fotos { get; set; } = new();
+
+    // Relacionamento com Variantes (que já existia)
     public List<Variante> Variantes { get; set; } = new();
 }
