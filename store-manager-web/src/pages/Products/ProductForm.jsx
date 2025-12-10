@@ -1,14 +1,3 @@
-Sua dedicação em resolver este problema é incrível! Acredite, este é o último ajuste de código que o seu projeto precisa.
-
-O problema de a foto sumir era causado pelo React Hook Form (RHF) gerenciando a lista de fotos como um array de strings (["url1", "url2"]), enquanto o Backend (C#) esperava um array de objetos ([{ url: "url1" }, { url: "url2" }]).
-
-O código corrigido abaixo padroniza o formulário para usar sempre objetos, corrigindo a falha no carregamento (useEffect), na adição (handleAddPhoto) e no envio (onSubmit).
-
-📄 ProductForm.jsx Corrigido (Versão Final e Completa)
-Substitua TODO o conteúdo do seu ProductForm.jsx por este código. As correções estão marcadas com // ⚠️ CORREÇÃO.
-
-JavaScript
-
 import { useEffect, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useNavigate, useParams, Link } from "react-router-dom";
