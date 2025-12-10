@@ -92,7 +92,7 @@ export function ProductForm() {
       categoria: "",
       precoCusto: 0,
       precoVenda: 0,
-      fotos: [], // AGORA É UM ARRAY DE STRINGS
+      fotos: [], // O Form usa Array de Strings ["url1", "url2"]
       variantes: [],
     },
   });
@@ -105,15 +105,13 @@ export function ProductForm() {
   // Observa o array de fotos para atualizar o preview em tempo real
   const fotosPreview = watch("fotos");
 
-  // Função para adicionar URL na lista de fotos
   const handleAddPhoto = () => {
     if (!tempUrl) return;
     const currentFotos = getValues("fotos") || [];
     setValue("fotos", [...currentFotos, tempUrl]);
-    setTempUrl(""); // Limpa o input
+    setTempUrl(""); 
   };
 
-  // Função para remover uma foto específica
   const handleRemovePhoto = (indexToRemove) => {
     const currentFotos = getValues("fotos");
     const newFotos = currentFotos.filter((_, index) => index !== indexToRemove);
@@ -126,10 +124,22 @@ export function ProductForm() {
         .get(`/produtos/${id}`)
         .then((response) => {
           const produto = response.data;
-          // Ajuste de compatibilidade caso o back ainda mande "fotoUrl" simples
-          if (produto.fotoUrl && (!produto.fotos || produto.fotos.length === 0)) {
+          
+          // --- CORREÇÃO DE CARREGAMENTO (IMPORTANTE) ---
+          // O Banco manda: [{ id: 1, url: "http..." }]
+          // O Form precisa: ["http..."]
+          
+          if (produto.fotos && Array.isArray(produto.fotos)) {
+             // Mapeia extraindo apenas a propriedade .url de cada objeto
+             const urlsApenas = produto.fotos.map(fotoObj => fotoObj.url || fotoObj); 
+             produto.fotos = urlsApenas;
+          }
+
+          // Fallback para produtos antigos
+          if ((!produto.fotos || produto.fotos.length === 0) && produto.fotoUrl) {
             produto.fotos = [produto.fotoUrl];
           }
+          
           reset(produto);
         })
         .catch(() => alert("Erro ao carregar produto."));
@@ -143,10 +153,14 @@ export function ProductForm() {
         id: isEditMode ? parseInt(id) : 0,
         precoCusto: parseFloat(data.precoCusto),
         precoVenda: parseFloat(data.precoVenda),
-        // Se o back esperar "FotoUrl" (string única), mandamos a primeira da lista
+        
+        // --- CORREÇÃO DE ENVIO (IMPORTANTE) ---
+        // Transforma ["url1", "url2"] em [{ url: "url1" }, { url: "url2" }]
+        fotos: data.fotos.map(url => ({ url: url })),
+        
+        // Mantém a primeira foto como "Capa" (fotoUrl) para compatibilidade
         fotoUrl: data.fotos.length > 0 ? data.fotos[0] : "", 
-        // Se o back já aceita lista, mandamos "fotos"
-        fotos: data.fotos,
+        
         variantes: data.variantes.map((v) => ({
           ...v,
           quantidadeEstoque: parseInt(v.quantidadeEstoque),
@@ -155,15 +169,15 @@ export function ProductForm() {
 
       if (isEditMode) {
         await api.put(`/produtos/${id}`, payload);
-        alert("Produto atualizado!");
+        alert("Produto e fotos atualizados!");
       } else {
         await api.post("/produtos", payload);
-        alert("Produto cadastrado!");
+        alert("Produto cadastrado com sucesso!");
       }
       navigate("/products");
     } catch (error) {
       console.error(error);
-      alert("Erro ao salvar. Verifique o console.");
+      alert("Erro ao salvar. Verifique se rodou as Migrations no C#.");
     }
   };
 
@@ -219,7 +233,7 @@ export function ProductForm() {
                   </select>
                 </div>
 
-                {/* --- SEÇÃO DE FOTOS (ATUALIZADA) --- */}
+                {/* --- SEÇÃO DE FOTOS --- */}
                 <div>
                   <label className="text-neutral-300 text-sm">Adicionar Fotos</label>
                   <div className="flex gap-2">
@@ -238,7 +252,6 @@ export function ProductForm() {
                     </button>
                   </div>
                   
-                  {/* Lista de miniaturas das URLs adicionadas */}
                   <div className="mt-3 flex flex-wrap gap-2">
                     {fotosPreview && fotosPreview.map((url, index) => (
                       <div key={index} className="relative group">
@@ -283,7 +296,7 @@ export function ProductForm() {
             </div>
           </div>
 
-          {/* ÁREA DE VARIAÇÕES (Mantida igual) */}
+          {/* ÁREA DE VARIAÇÕES */}
           <div className="bg-luke-card p-6 rounded-xl border border-neutral-800 border-l-4 border-l-luke-gold">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-white font-bold text-lg">
@@ -359,10 +372,7 @@ export function ProductForm() {
             <h3 className="text-neutral-400 text-sm mb-4">
               Preview da Vitrine
             </h3>
-            {/* CONTAINER DA FOTO/CARROSSEL */}
             <div className="aspect-[3/4] bg-luke-dark rounded-lg overflow-hidden border border-neutral-800 relative group">
-              
-              {/* AQUI ESTÁ O CARROSSEL */}
               <InstagramCarousel images={fotosPreview} />
 
               <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/90 to-transparent p-4 text-left pointer-events-none">
