@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Package, ShoppingCart, LogOut } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, LogOut, Store } from "lucide-react"; // 👈 Adicionei o ícone Store
 
 export function Sidebar() {
   const location = useLocation();
@@ -51,8 +51,21 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Botão Sair */}
-      <div className="p-4 border-t border-neutral-800">
+      {/* Rodapé da Sidebar */}
+      <div className="p-4 border-t border-neutral-800 space-y-2">
+        
+        {/* 👇 NOVO BOTÃO: VER LOJA PÚBLICA 👇 */}
+        <Link
+          to="/loja"
+          target="_blank"  // Abre em nova aba
+          rel="noopener noreferrer" // Segurança para links externos
+          className="flex items-center gap-3 px-4 py-3 text-luke-gold hover:bg-luke-gold/10 rounded-md transition-colors font-medium border border-dashed border-neutral-700 hover:border-luke-gold"
+        >
+          <Store className="w-5 h-5" />
+          <span>Ver Loja Online</span>
+        </Link>
+
+        {/* Botão Sair */}
         <Link
           to="/"
           // Mudança: Hover vermelho sutil para manter a semântica de "sair"
