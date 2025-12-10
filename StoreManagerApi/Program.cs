@@ -26,10 +26,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 
 // 2. Configuração do JWT (Segurança)
-// A chave é lida da variável de ambiente CHAVE_SECRETA_JWT no Vercel
-var chaveSecreta = builder.Configuration["CHAVE_SECRETA_JWT"]; 
-// Se não encontrar a variável, usa a chave hardcoded como fallback
-var key = Encoding.ASCII.GetBytes(chaveSecreta ?? "ESTA_E_UMA_CHAVE_MUITO_SECRETA_DO_LUKE_MUKE_SYSTEM_2025");
+// ⚠️ CORREÇÃO: Força a leitura da CHAVE_SECRETA_DO_BANCO (Service Role Key)
+// Isso garante que a chave mais forte esteja em todo o contexto.
+var chaveDeSeguranca = Environment.GetEnvironmentVariable("CHAVE_SECRETA_DO_BANCO");
+
+// Se a variável do Vercel falhar, usa a chave de fallback.
+var key = Encoding.ASCII.GetBytes(chaveDeSeguranca ?? "ESTA_E_UMA_CHAVE_MUITO_SECRETA_DO_LUKE_MUKE_SYSTEM_2025");
 
 builder.Services.AddAuthentication(x =>
 {
@@ -40,7 +42,7 @@ builder.Services.AddAuthentication(x =>
 {
     x.RequireHttpsMetadata = false;
     x.SaveToken = true;
-    x.TokenValidationParameters = new ValidationParameters
+    x.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(key),
@@ -75,8 +77,7 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<AppDbContext>();
-        // Agora que a stringConexao (ConexaoSupabase) é a chave Direta,
-        // a migração será feita de forma estável.
+        // A migração usará a string de conexão mais forte.
         context.Database.Migrate(); 
         Console.WriteLine("✅ SUCESSO! Banco de dados conectado e migrado!");
     }
