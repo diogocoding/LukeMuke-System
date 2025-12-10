@@ -11,4 +11,5 @@ public class AppDbContext : DbContext
     public DbSet<Variante> Variantes { get; set; }
     public DbSet<Venda> Vendas { get; set; }
     public DbSet<Usuario> Usuarios { get; set; }
+    public DbSet<ProdutoFoto> ProdutoFotos { get; set; }
 }
