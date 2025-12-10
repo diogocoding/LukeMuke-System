@@ -6,12 +6,26 @@ using StoreManagerApi.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Configuração do Banco de Dados
+// =================================================================================
+// 1. CONFIGURAÇÃO DO BANCO DE DADOS (COM DIAGNÓSTICO)
+// =================================================================================
+
+// Pega a string do arquivo
+var stringConexao = builder.Configuration.GetConnectionString("ConexaoSupabase");
+
+// IMPRIME NO CONSOLE O QUE ELE LEU (Para sabermos se leu o arquivo certo)
+Console.WriteLine("==================================================");
+Console.WriteLine($"[DIAGNÓSTICO] O SISTEMA LEU DO ARQUIVO:");
+Console.WriteLine(stringConexao);
+Console.WriteLine("==================================================");
+
+// Usa a string lida para conectar
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(stringConexao));
+
 
 // 2. Configuração do JWT (Segurança)
-var key = Encoding.ASCII.GetBytes("ESTA_E_UMA_CHAVE_MUITO_SECRETA_DO_LUKE_MUKE_SYSTEM_2025"); // Chave longa obrigatória
+var key = Encoding.ASCII.GetBytes("ESTA_E_UMA_CHAVE_MUITO_SECRETA_DO_LUKE_MUKE_SYSTEM_2025");
 builder.Services.AddAuthentication(x =>
 {
     x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -30,14 +44,14 @@ builder.Services.AddAuthentication(x =>
     };
 });
 
-// 3. Configuração do CORS (Para o React funcionar)
+// 3. Configuração do CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", builder =>
     {
-        builder.SetIsOriginAllowed(origin => true) // Libera qualquer origem
-               .AllowAnyHeader()
-               .AllowAnyMethod();
+        builder.SetIsOriginAllowed(origin => true)
+                .AllowAnyHeader()
+                .AllowAnyMethod();
     });
 });
 
@@ -47,7 +61,7 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// --- INÍCIO DO BLOCO NOVO (MIGRATION) ---
+// --- MIGRAÇÃO AUTOMÁTICA ---
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -55,29 +69,25 @@ using (var scope = app.Services.CreateScope())
     {
         var context = services.GetRequiredService<AppDbContext>();
         context.Database.Migrate();
-        Console.WriteLine("✅ Banco de dados migrado com sucesso!");
+        Console.WriteLine("✅ SUCESSO! Banco de dados conectado e migrado!");
     }
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "❌ Um erro ocorreu durante a migração do banco.");
+        logger.LogError(ex, "❌ ERRO CRÍTICO AO CONECTAR.");
     }
 }
-// --- FIM DO BLOCO NOVO ---
 
-
-// Pipeline de Requisição
+// Pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseCors("AllowReactApp"); // CORS antes da Autenticação
-
-app.UseAuthentication(); // <--- Liga o porteiro (Quem é você?)
-app.UseAuthorization();  // <--- Verifica permissão (Você pode entrar?)
-
+app.UseCors("AllowReactApp");
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
