@@ -22,11 +22,11 @@ public class ProdutosController : ControllerBase
     {
         return await _context.Produtos
             .Include(p => p.Variantes)
-            .Include(p => p.Fotos) // <--- Inclui as fotos na listagem
+            .Include(p => p.Fotos) // <--- Inclui as fotos na listagem geral
             .ToListAsync();
     }
 
-    // 2. DASHBOARD (Mantido igual)
+    // 2. DASHBOARD
     [HttpGet("dashboard")]
     public async Task<ActionResult<dynamic>> GetDashboardStats()
     {
@@ -38,13 +38,13 @@ public class ProdutosController : ControllerBase
         return new { totalProdutos, valorEstoque, vendasHoje };
     }
 
-    // 3. BUSCAR UM
+    // 3. BUSCAR UM (POR ID)
     [HttpGet("{id}")]
     public async Task<ActionResult<Produto>> GetProduto(int id)
     {
         var produto = await _context.Produtos
             .Include(p => p.Variantes)
-            .Include(p => p.Fotos) // <--- Carrega as fotos ao editar
+            .Include(p => p.Fotos) // <--- Essencial para carregar as fotos na tela de edição
             .FirstOrDefaultAsync(p => p.Id == id);
 
         if (produto == null) return NotFound();
@@ -56,13 +56,15 @@ public class ProdutosController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Produto>> PostProduto(Produto produto)
     {
+        // O EF Core identifica automaticamente as fotos na lista produto.Fotos
+        // e as salva na tabela ProdutoFotos
         _context.Produtos.Add(produto);
         await _context.SaveChangesAsync();
 
         return CreatedAtAction(nameof(GetProduto), new { id = produto.Id }, produto);
     }
 
-    // 5. CHECKOUT (Mantido igual)
+    // 5. CHECKOUT
     [HttpPost("checkout")]
     public async Task<IActionResult> Checkout([FromBody] List<int> productIds)
     {
@@ -86,17 +88,17 @@ public class ProdutosController : ControllerBase
 
         var produtoExistente = await _context.Produtos
             .Include(p => p.Variantes)
-            .Include(p => p.Fotos) // <--- Importante incluir para poder deletar as velhas
+            .Include(p => p.Fotos) // <--- Carrega as antigas para poder remover
             .FirstOrDefaultAsync(p => p.Id == id);
 
         if (produtoExistente == null) return NotFound();
 
-        // Atualiza dados básicos
+        // --- Atualiza dados básicos ---
         produtoExistente.Nome = produto.Nome;
         produtoExistente.Categoria = produto.Categoria;
         produtoExistente.PrecoCusto = produto.PrecoCusto;
         produtoExistente.PrecoVenda = produto.PrecoVenda;
-        produtoExistente.FotoUrl = produto.FotoUrl;
+        produtoExistente.FotoUrl = produto.FotoUrl; // Capa principal
 
         // --- ATUALIZA VARIANTES ---
         if (produtoExistente.Variantes != null)
@@ -108,7 +110,7 @@ public class ProdutosController : ControllerBase
         {
             foreach (var v in produto.Variantes)
             {
-                v.Id = 0;
+                v.Id = 0; // Zera o ID para forçar inserção
                 v.ProdutoId = id;
                 produtoExistente.Variantes.Add(v);
             }
@@ -117,7 +119,7 @@ public class ProdutosController : ControllerBase
         // --- ATUALIZA FOTOS (NOVO) ---
         if (produtoExistente.Fotos != null)
         {
-             // Remove as fotos antigas para salvar a nova lista atualizada
+             // Remove todas as fotos antigas do banco
             _context.ProdutoFotos.RemoveRange(produtoExistente.Fotos);
         }
 
@@ -125,7 +127,7 @@ public class ProdutosController : ControllerBase
         {
             foreach (var f in produto.Fotos)
             {
-                f.Id = 0; // Garante que é inserção
+                f.Id = 0; // Zera o ID para garantir que o banco crie novas linhas
                 f.ProdutoId = id;
                 produtoExistente.Fotos.Add(f);
             }
