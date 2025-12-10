@@ -22,7 +22,7 @@ public class ProdutosController : ControllerBase
     {
         return await _context.Produtos
             .Include(p => p.Variantes)
-            .Include(p => p.Fotos) // <--- Inclui as fotos na listagem geral
+            .Include(p => p.Fotos)
             .ToListAsync();
     }
 
@@ -44,7 +44,7 @@ public class ProdutosController : ControllerBase
     {
         var produto = await _context.Produtos
             .Include(p => p.Variantes)
-            .Include(p => p.Fotos) // <--- Essencial para carregar as fotos na tela de edição
+            .Include(p => p.Fotos)
             .FirstOrDefaultAsync(p => p.Id == id);
 
         if (produto == null) return NotFound();
@@ -52,19 +52,26 @@ public class ProdutosController : ControllerBase
         return produto;
     }
 
-    // 4. CRIAR
+    // 4. CRIAR (POST) - CORRIGIDO PARA GARANTIR MULTI-FOTOS
     [HttpPost]
     public async Task<ActionResult<Produto>> PostProduto(Produto produto)
     {
-        // O EF Core identifica automaticamente as fotos na lista produto.Fotos
-        // e as salva na tabela ProdutoFotos
+        // ⚠️ CORREÇÃO: Garante que todos os IDs de fotos sejam zero para forçar o INSERT
+        if (produto.Fotos != null)
+        {
+            foreach (var f in produto.Fotos)
+            {
+                f.Id = 0; 
+            }
+        }
+        
         _context.Produtos.Add(produto);
         await _context.SaveChangesAsync();
 
         return CreatedAtAction(nameof(GetProduto), new { id = produto.Id }, produto);
     }
 
-    // 5. CHECKOUT
+    // 5. CHECKOUT (Sem alterações)
     [HttpPost("checkout")]
     public async Task<IActionResult> Checkout([FromBody] List<int> productIds)
     {
@@ -80,7 +87,7 @@ public class ProdutosController : ControllerBase
         return Ok(new { message = "Venda registrada!" });
     }
 
-    // 6. EDITAR
+    // 6. EDITAR (PUT) - CORRIGIDO PARA RASTREAMENTO DO EF CORE
     [HttpPut("{id}")]
     public async Task<IActionResult> PutProduto(int id, Produto produto)
     {
@@ -88,7 +95,7 @@ public class ProdutosController : ControllerBase
 
         var produtoExistente = await _context.Produtos
             .Include(p => p.Variantes)
-            .Include(p => p.Fotos) // <--- Carrega as antigas para poder remover
+            .Include(p => p.Fotos) // <--- Carrega as antigas
             .FirstOrDefaultAsync(p => p.Id == id);
 
         if (produtoExistente == null) return NotFound();
@@ -116,14 +123,13 @@ public class ProdutosController : ControllerBase
             }
         }
 
-        // --- ATUALIZA FOTOS (CORRIGIDO PARA RASTREAMENTO DO EF CORE) ---
+        // --- ATUALIZA FOTOS ---
         if (produtoExistente.Fotos != null)
         {
             // 1. Remove as entidades antigas do Context (marca para deleção no DB)
             _context.ProdutoFotos.RemoveRange(produtoExistente.Fotos);
             
             // 2. ⚠️ LIMPEZA CRUCIAL: Substitui a lista rastreada por uma nova e vazia.
-            // Isso impede que o EF Core tente conciliar a lista velha com a nova.
             produtoExistente.Fotos = new List<ProdutoFoto>(); 
         }
 
@@ -151,7 +157,7 @@ public class ProdutosController : ControllerBase
         return NoContent();
     }
 
-    // 7. DELETAR
+    // 7. DELETAR (Sem alterações)
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteProduto(int id)
     {
