@@ -16,16 +16,17 @@ public class ProdutosController : ControllerBase
         _context = context;
     }
 
-    // 1. LISTAR TUDO (Para a tabela e vitrine)
+    // 1. LISTAR TUDO
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Produto>>> GetProdutos()
     {
         return await _context.Produtos
             .Include(p => p.Variantes)
+            .Include(p => p.Fotos) // <--- Inclui as fotos na listagem
             .ToListAsync();
     }
 
-    // 2. DASHBOARD (Para os gráficos e números)
+    // 2. DASHBOARD (Mantido igual)
     [HttpGet("dashboard")]
     public async Task<ActionResult<dynamic>> GetDashboardStats()
     {
@@ -37,12 +38,13 @@ public class ProdutosController : ControllerBase
         return new { totalProdutos, valorEstoque, vendasHoje };
     }
 
-    // 3. BUSCAR UM (Para editar)
+    // 3. BUSCAR UM
     [HttpGet("{id}")]
     public async Task<ActionResult<Produto>> GetProduto(int id)
     {
         var produto = await _context.Produtos
             .Include(p => p.Variantes)
+            .Include(p => p.Fotos) // <--- Carrega as fotos ao editar
             .FirstOrDefaultAsync(p => p.Id == id);
 
         if (produto == null) return NotFound();
@@ -50,7 +52,7 @@ public class ProdutosController : ControllerBase
         return produto;
     }
 
-    // 4. CRIAR (Novo produto)
+    // 4. CRIAR
     [HttpPost]
     public async Task<ActionResult<Produto>> PostProduto(Produto produto)
     {
@@ -60,7 +62,7 @@ public class ProdutosController : ControllerBase
         return CreatedAtAction(nameof(GetProduto), new { id = produto.Id }, produto);
     }
 
-    // 5. CHECKOUT (Finalizar venda)
+    // 5. CHECKOUT (Mantido igual)
     [HttpPost("checkout")]
     public async Task<IActionResult> Checkout([FromBody] List<int> productIds)
     {
@@ -76,7 +78,7 @@ public class ProdutosController : ControllerBase
         return Ok(new { message = "Venda registrada!" });
     }
 
-    // 6. EDITAR (AQUI ESTAVA O AVISO AMARELO - CORRIGIDO)
+    // 6. EDITAR
     [HttpPut("{id}")]
     public async Task<IActionResult> PutProduto(int id, Produto produto)
     {
@@ -84,6 +86,7 @@ public class ProdutosController : ControllerBase
 
         var produtoExistente = await _context.Produtos
             .Include(p => p.Variantes)
+            .Include(p => p.Fotos) // <--- Importante incluir para poder deletar as velhas
             .FirstOrDefaultAsync(p => p.Id == id);
 
         if (produtoExistente == null) return NotFound();
@@ -95,22 +98,36 @@ public class ProdutosController : ControllerBase
         produtoExistente.PrecoVenda = produto.PrecoVenda;
         produtoExistente.FotoUrl = produto.FotoUrl;
 
-        // Atualiza Variantes
+        // --- ATUALIZA VARIANTES ---
         if (produtoExistente.Variantes != null)
         {
             _context.Variantes.RemoveRange(produtoExistente.Variantes);
         }
-
-        // CORREÇÃO DO AMARELO: Garante que a lista existe antes de adicionar
-        produtoExistente.Variantes ??= new List<Variante>();
-
+        
         if (produto.Variantes != null)
         {
-            foreach (var variante in produto.Variantes)
+            foreach (var v in produto.Variantes)
             {
-                variante.Id = 0;
-                variante.ProdutoId = id;
-                produtoExistente.Variantes.Add(variante); // Agora é seguro!
+                v.Id = 0;
+                v.ProdutoId = id;
+                produtoExistente.Variantes.Add(v);
+            }
+        }
+
+        // --- ATUALIZA FOTOS (NOVO) ---
+        if (produtoExistente.Fotos != null)
+        {
+             // Remove as fotos antigas para salvar a nova lista atualizada
+            _context.ProdutoFotos.RemoveRange(produtoExistente.Fotos);
+        }
+
+        if (produto.Fotos != null)
+        {
+            foreach (var f in produto.Fotos)
+            {
+                f.Id = 0; // Garante que é inserção
+                f.ProdutoId = id;
+                produtoExistente.Fotos.Add(f);
             }
         }
 
