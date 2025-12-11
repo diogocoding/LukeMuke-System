@@ -64,7 +64,7 @@ export function ProductList() {
           <p className="text-neutral-400 mt-1">Gerencie o estoque do atelier</p>
         </div>
 
-        {/* 🎯 LINK DO INSTAGRAM (Adicionado aqui) */}
+        {/* 🎯 LINK DO INSTAGRAM AQUI (Fica ao lado do título 'Produtos') */}
         <a
             href="https://www.instagram.com/[SEU_USUARIO]" // ⚠️ COLOQUE O LINK CORRETO DA SUA LOJA!
             target="_blank"
@@ -85,7 +85,7 @@ export function ProductList() {
         </Link>
       </div>
 
-      {/* 🏷️ FILTROS DE CATEGORIA (Adicionado aqui) */}
+      {/* 🏷️ FILTROS DE CATEGORIA AQUI (SEÇÕES) */}
       <div className="flex gap-4 mb-6 overflow-x-auto pb-2">
         {categories.map(category => (
             <button
