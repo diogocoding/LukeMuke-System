@@ -245,6 +245,7 @@ export function ProductForm() {
                   >
                     <option value="Ternos">Ternos</option>
                     <option value="Camisas">Camisas</option>
+                    <option value="Regata">Regata</option>
                     <option value="Calças">Calças</option>
                     <option value="Shorts">Shorts</option>
                     <option value="Acessórios">Acessórios</option>
