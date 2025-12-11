@@ -1,23 +1,3 @@
-Excelente! Agora temos o código correto da vitrine pública (Vitrine.jsx) e o link do Instagram.
-
-O erro anterior foi corrigido. Agora, vamos aplicar o link e os filtros de seção diretamente na sua vitrine.
-
-📄 Vitrine.jsx Corrigido (Instagram + Seções/Filtros)
-Substitua o conteúdo completo do seu arquivo Vitrine.jsx por este código.
-
-Ações realizadas:
-
-Adicionado o ícone Instagram ao import.
-
-Adicionado o link do Instagram no cabeçalho.
-
-Adicionado o estado selectedCategory para o filtro.
-
-Criados os botões de seção (Camisas, Shorts, Regata).
-
-A lista de produtos agora é filtrada antes de ser exibida.
-
-JavaScript
 
 import { useEffect, useState } from "react";
 // ⚠️ Adicionado o Instagram ao import
