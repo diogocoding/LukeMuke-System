@@ -5,8 +5,7 @@ import { api } from "../../services/api";
 
 export function Vitrine() {
   const [products, setProducts] = useState([]);
-  const [cart, setCart] = useState([]);
-  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
   // NOVO ESTADO: Filtro de seção
   const [selectedCategory, setSelectedCategory] = useState('Todos');
 
@@ -20,7 +19,7 @@ export function Vitrine() {
 
 
   useEffect(() => {
-    api.get("/produtos").then((res) => setProducts(res.data));
+    api.get("/produtos").then((res) => setProducts(res.data)).finally(() => setLoading(false));
   }, []);
 
   // Adicionar ao carrinho
@@ -75,15 +74,18 @@ export function Vitrine() {
             <h1 className="text-2xl font-serif font-bold tracking-wide">
               Luke Muke Store
             </h1>
-            {/* LINK DO INSTAGRAM AO LADO DO TÍTULO */}
+            
+            {/* 🎯 LINK DO INSTAGRAM AO LADO DO TÍTULO (NOVO LAYOUT) */}
             <a
                 href={instagramLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-neutral-400 hover:text-luke-gold hidden sm:flex items-center gap-1 transition-colors ml-4"
+                className="text-neutral-400 hover:text-luke-gold hidden sm:flex items-center gap-1 transition-colors ml-4 text-sm"
                 title="Visite nosso Instagram"
             >
-                <Instagram className="w-5 h-5" />
+                Visite nosso Instagram 
+                <Instagram className="w-4 h-4 ml-1" />
+                @lukemuke_atelier
             </a>
           </div>
           <button
@@ -102,8 +104,8 @@ export function Vitrine() {
 
       {/* Grid de Produtos */}
       <main className="max-w-6xl mx-auto p-6">
-        {/* FILTROS DE CATEGORIA (SEÇÕES) */}
-        <div className="flex gap-4 mb-8 overflow-x-auto pb-2">
+        {/* 🏷️ FILTROS DE CATEGORIA (SEÇÕES) */}
+        <div className="flex gap-4 mb-8 overflow-x-auto pb-2 border-b border-neutral-800">
             {categories.map(category => (
                 <button
                     key={category}
@@ -118,45 +120,53 @@ export function Vitrine() {
             ))}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {/* MAPEIA A LISTA FILTRADA */}
-          {filteredProducts.map((product) => (
-            <div
-              key={product.id}
-              className="bg-neutral-800 rounded-xl overflow-hidden shadow-lg border border-neutral-700 hover:border-luke-gold transition-all group"
-            >
-              <div className="h-64 bg-neutral-900 overflow-hidden relative">
-                <img
-                  src={
-                    product.fotoUrl ||
-                    "https://via.placeholder.com/300?text=Sem+Foto"
-                  }
-                  alt={product.nome}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-white mb-2">
-                  {product.nome}
-                </h3>
-                <p className="text-neutral-400 text-sm mb-4">
-                  {product.categoria}
-                </p>
-                <div className="flex items-center justify-between">
-                  <span className="text-2xl font-bold text-luke-gold">
-                    R$ {product.precoVenda?.toFixed(2)}
-                  </span>
-                  <button
-                    onClick={() => addToCart(product)}
-                    className="bg-white text-black p-3 rounded-full hover:bg-luke-gold transition-colors shadow-lg"
-                  >
-                    <Plus className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        {loading ? (
+            <div className="text-center py-10 text-neutral-400">Carregando produtos...</div>
+        ) : filteredProducts.length === 0 ? (
+            <div className="text-center py-10 text-neutral-400">
+                Nenhum produto encontrado na seção {selectedCategory}.
+            </div>
+        ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {/* MAPEIA A LISTA FILTRADA */}
+                {filteredProducts.map((product) => (
+                    <div
+                        key={product.id}
+                        className="bg-neutral-800 rounded-xl overflow-hidden shadow-lg border border-neutral-700 hover:border-luke-gold transition-all group"
+                    >
+                        <div className="h-64 bg-neutral-900 overflow-hidden relative">
+                            <img
+                                src={
+                                    product.fotoUrl ||
+                                    "https://via.placeholder.com/300?text=Sem+Foto"
+                                }
+                                alt={product.nome}
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            />
+                        </div>
+                        <div className="p-6">
+                            <h3 className="text-xl font-bold text-white mb-2">
+                                {product.nome}
+                            </h3>
+                            <p className="text-neutral-400 text-sm mb-4">
+                                {product.categoria}
+                            </p>
+                            <div className="flex items-center justify-between">
+                                <span className="text-2xl font-bold text-luke-gold">
+                                    R$ {product.precoVenda?.toFixed(2).replace('.', ',')}
+                                </span>
+                                <button
+                                    onClick={() => addToCart(product)}
+                                    className="bg-white text-black p-3 rounded-full hover:bg-luke-gold transition-colors shadow-lg"
+                                >
+                                    <Plus className="w-5 h-5" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        )}
       </main>
 
       {/* Carrinho Lateral (Modal) */}
