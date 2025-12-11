@@ -1,6 +1,18 @@
+Você está certo, vamos corrigir essa falha de sintaxe de forma definitiva.
+
+O erro estava nesta linha, onde o compilador esperava um fechamento de parênteses antes de encontrar o className:
+
+166 |          <div className="fixed inset-0 z-50 flex justify-end">
+
+A causa exata era o comentário mal formatado na linha anterior ({/* ... */}).
+
+📄 Vitrine.jsx Corrigido (Sintaxe e Funcionalidades)
+Substituí o comentário problemático no bloco do carrinho pela sintaxe correta do JSX. Este é o código completo e final do seu componente Vitrine.jsx com o Instagram e os filtros de seção:
+
+JavaScript
 
 import { useEffect, useState } from "react";
-// ⚠️ Adicionado o Instagram ao import
+// Importa o ícone do Instagram
 import { ShoppingCart, Trash2, MessageCircle, Plus, Instagram } from "lucide-react"; 
 import { api } from "../../services/api";
 
@@ -8,15 +20,15 @@ export function Vitrine() {
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  // ⚠️ NOVO ESTADO: Filtro de seção
+  // NOVO ESTADO: Filtro de seção
   const [selectedCategory, setSelectedCategory] = useState('Todos');
 
   // SEU NÚMERO DE WHATSAPP AQUI (Apenas números, com DDI e DDD)
   const TELEFONE_LOJA = "5581996897368";
   
-  // ⚠️ CATEGORIAS DA LOJA
+  // CATEGORIAS DA LOJA
   const categories = ['Todos', 'Camisas', 'Shorts', 'Regata'];
-  // ⚠️ LINK DO INSTAGRAM FORNECIDO
+  // LINK DO INSTAGRAM FORNECIDO
   const instagramLink = "https://www.instagram.com/lukemuke_atelier";
 
 
@@ -56,7 +68,7 @@ export function Vitrine() {
     window.open(url, "_blank");
   };
   
-  // ⚠️ CÁLCULO: Filtra a lista de produtos baseada na categoria
+  // CÁLCULO: Filtra a lista de produtos baseada na categoria
   const filteredProducts = selectedCategory === 'Todos'
     ? products
     : products.filter(product => product.categoria === selectedCategory);
@@ -76,7 +88,7 @@ export function Vitrine() {
             <h1 className="text-2xl font-serif font-bold tracking-wide">
               Luke Muke Store
             </h1>
-            {/* 🎯 LINK DO INSTAGRAM AO LADO DO TÍTULO */}
+            {/* LINK DO INSTAGRAM AO LADO DO TÍTULO */}
             <a
                 href={instagramLink}
                 target="_blank"
@@ -103,7 +115,7 @@ export function Vitrine() {
 
       {/* Grid de Produtos */}
       <main className="max-w-6xl mx-auto p-6">
-        {/* 🏷️ FILTROS DE CATEGORIA (SEÇÕES) */}
+        {/* FILTROS DE CATEGORIA (SEÇÕES) */}
         <div className="flex gap-4 mb-8 overflow-x-auto pb-2">
             {categories.map(category => (
                 <button
@@ -120,7 +132,7 @@ export function Vitrine() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {/* ⚠️ MAPEIA A LISTA FILTRADA */}
+          {/* MAPEIA A LISTA FILTRADA */}
           {filteredProducts.map((product) => (
             <div
               key={product.id}
@@ -160,14 +172,16 @@ export function Vitrine() {
         </div>
       </main>
 
-      {/* Carrinho Lateral (MANTIDO) */}
+      {/* Carrinho Lateral (Modal) */}
       {isCartOpen && (
-        {/* ... (Conteúdo do carrinho) ... */}
         <div className="fixed inset-0 z-50 flex justify-end">
+          {/* Fundo escuro */}
           <div
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setIsCartOpen(false)}
           ></div>
+
+          {/* Conteúdo do Carrinho */}
           <div className="relative w-full max-w-md bg-neutral-900 h-full shadow-2xl border-l border-neutral-800 flex flex-col p-6 animate-in slide-in-from-right">
             <div className="flex justify-between items-center mb-6 border-b border-neutral-800 pb-4">
               <h2 className="text-2xl font-serif font-bold text-luke-gold">
