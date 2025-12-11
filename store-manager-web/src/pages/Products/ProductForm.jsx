@@ -6,12 +6,12 @@ import { api } from "../../services/api";
 
 // --- COMPONENTE CARROSSEL (ESTILO INSTAGRAM) ---
 function InstagramCarousel({ images }) {
+  // images agora é um array de objetos { url: string }
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // ⚠️ CORREÇÃO: Pega a URL do objeto de foto (images[currentIndex].url)
+  // Pega a URL do objeto de foto (images[currentIndex].url)
   const currentImageUrl = images && images.length > 0 ? images[currentIndex].url : null;
   
-  // Se não tiver imagens, mostra placeholder
   if (!images || images.length === 0 || !currentImageUrl) {
     return (
       <div className="flex items-center justify-center h-full text-neutral-600 bg-luke-dark">
@@ -86,8 +86,9 @@ export function ProductForm() {
   const { id } = useParams();
   const isEditMode = !!id;
 
-  // Estado local para capturar a URL antes de adicionar à lista
   const [tempUrl, setTempUrl] = useState("");
+  const fixedFields = ["fotoUrl", "fotoSecundariaUrl", "fotoTerciariaUrl", "fotoQuartaUrl"];
+  const maxPhotos = fixedFields.length;
 
   const { register, control, handleSubmit, watch, reset, setValue, getValues } = useForm({
     defaultValues: {
@@ -95,7 +96,11 @@ export function ProductForm() {
       categoria: "",
       precoCusto: 0,
       precoVenda: 0,
-      fotos: [], // ⚠️ CORREÇÃO: Agora gerencia objetos de foto {url: '...'}
+      // ⚠️ NOVOS CAMPOS FIXOS
+      fotoUrl: "",
+      fotoSecundariaUrl: "",
+      fotoTerciariaUrl: "",
+      fotoQuartaUrl: "",
       variantes: [],
     },
   });
@@ -105,25 +110,45 @@ export function ProductForm() {
     name: "variantes",
   });
 
-  // Observa o array de fotos para atualizar o preview em tempo real
-  const fotosPreview = watch("fotos");
+  // --- Lógica de Visualização e Gerenciamento de 4 Fotos Fixas ---
+  const currentUrls = fixedFields.map(field => watch(field));
+  
+  // Cria o array de objetos para o Carousel
+  const fotosPreviewObjects = currentUrls
+    .filter(url => url && url.trim() !== "")
+    .map(url => ({ url }));
 
-  // ⚠️ CORREÇÃO: Adiciona a nova foto como um OBJETO { url: '...' }
+  // Adiciona a URL no primeiro campo vazio disponível
   const handleAddPhoto = () => {
     if (!tempUrl.trim()) return;
-    
-    const currentFotos = getValues("fotos") || [];
-    
-    // Adiciona um OBJETO com url e id=0 (para o C# saber que é novo)
-    setValue("fotos", [...currentFotos, { url: tempUrl, id: 0 }]); 
-    setTempUrl(""); 
+
+    let isAdded = false;
+    for (const field of fixedFields) {
+      if (!getValues(field)) {
+        setValue(field, tempUrl);
+        isAdded = true;
+        break;
+      }
+    }
+
+    if (isAdded) {
+      setTempUrl("");
+    } else {
+      alert(`Limite de ${maxPhotos} fotos atingido.`);
+    }
   };
 
-  // Mantém a lógica de remoção
+  // Remove a foto e 'empurra' as URLs restantes para preencher a lacuna
   const handleRemovePhoto = (indexToRemove) => {
-    const currentFotos = getValues("fotos");
-    const newFotos = currentFotos.filter((_, index) => index !== indexToRemove);
-    setValue("fotos", newFotos);
+    // 1. Remove a URL no índice
+    const newUrls = currentUrls.filter((_, index) => index !== indexToRemove);
+
+    // 2. Preenche os campos fixos com as URLs 'empurradas'
+    for (let i = 0; i < maxPhotos; i++) {
+      const fieldName = fixedFields[i];
+      const urlToSet = newUrls[i] || ""; // Pega a URL 'empurrada' ou ""
+      setValue(fieldName, urlToSet);
+    }
   };
 
   useEffect(() => {
@@ -132,27 +157,14 @@ export function ProductForm() {
         .get(`/produtos/${id}`)
         .then((response) => {
           const produto = response.data;
-          
-          // --- CORREÇÃO DE CARREGAMENTO ---
-          // Remove o mapeamento redundante. O Backend já envia o array de OBJETOS {url: ...},
-          // então o reset pode aceitar o array diretamente.
-          if (produto.fotos && Array.isArray(produto.fotos)) {
-             // Não fazemos nada, o array já está correto: [{ id: 1, url: '...' }]
-          }
-
-          // Fallback para produtos antigos (se tiver fotoUrl mas não tiver lista de fotos)
-          if ((!produto.fotos || produto.fotos.length === 0) && produto.fotoUrl) {
-            // Transforma a fotoUrl antiga em um array de objetos para o form
-            produto.fotos = [{ url: produto.fotoUrl, id: 0 }];
-          }
-          
-          reset(produto);
+          reset(produto); // O reset vai carregar os 4 campos fixos automaticamente
         })
         .catch(() => alert("Erro ao carregar produto."));
     }
   }, [id, isEditMode, reset]);
 
-  // ⚠️ CORREÇÃO: Simplifica o envio, pois o 'data.fotos' já está no formato correto.
+
+  // Lógica de envio (agora simples, pois os 4 campos são enviados como strings)
   const onSubmit = async (data) => {
     try {
       const payload = {
@@ -161,11 +173,11 @@ export function ProductForm() {
         precoCusto: parseFloat(data.precoCusto),
         precoVenda: parseFloat(data.precoVenda),
         
-        // ✅ O Backend (C#) espera a lista de objetos, que agora é enviada diretamente
-        fotos: data.fotos,
-        
-        // Mantém a primeira foto como "Capa" (fotoUrl) para compatibilidade
-        fotoUrl: data.fotos.length > 0 ? data.fotos[0].url : "", // ⚠️ ACESSA .url
+        // ✅ Os 4 campos fixos são enviados diretamente como strings
+        fotoUrl: data.fotoUrl,
+        fotoSecundariaUrl: data.fotoSecundariaUrl,
+        fotoTerciariaUrl: data.fotoTerciariaUrl,
+        fotoQuartaUrl: data.fotoQuartaUrl,
         
         variantes: data.variantes.map((v) => ({
           ...v,
@@ -239,9 +251,9 @@ export function ProductForm() {
                   </select>
                 </div>
 
-                {/* --- SEÇÃO DE FOTOS --- */}
+                {/* --- SEÇÃO DE FOTOS (AJUSTADA PARA 4) --- */}
                 <div>
-                  <label className="text-neutral-300 text-sm">Adicionar Fotos</label>
+                  <label className="text-neutral-300 text-sm">Adicionar Fotos (Máx: {maxPhotos})</label>
                   <div className="flex gap-2">
                     <input
                       value={tempUrl}
@@ -252,17 +264,18 @@ export function ProductForm() {
                     <button
                       type="button"
                       onClick={handleAddPhoto}
-                      className="bg-neutral-800 border border-neutral-700 hover:bg-neutral-700 text-luke-gold px-4 rounded-lg"
+                      disabled={fotosPreviewObjects.length >= maxPhotos}
+                      className="bg-neutral-800 border border-neutral-700 hover:bg-neutral-700 text-luke-gold px-4 rounded-lg disabled:opacity-50"
                     >
                       <Plus />
                     </button>
                   </div>
                   
                   <div className="mt-3 flex flex-wrap gap-2">
-                    {fotosPreview && fotosPreview.map((fotoObj, index) => ( // ⚠️ CORREÇÃO: Lê 'fotoObj'
+                    {fotosPreviewObjects.map((fotoObj, index) => (
                       <div key={index} className="relative group">
                         <img 
-                          src={fotoObj.url} // ⚠️ CORREÇÃO: Acessa o objeto {url: '...'}
+                          src={fotoObj.url}
                           alt="preview" 
                           className="w-12 h-12 rounded border border-neutral-700 object-cover" 
                         />
@@ -302,7 +315,7 @@ export function ProductForm() {
             </div>
           </div>
 
-          {/* ÁREA DE VARIAÇÕES */}
+          {/* ÁREA DE VARIAÇÕES (MANTIDA) */}
           <div className="bg-luke-card p-6 rounded-xl border border-neutral-800 border-l-4 border-l-luke-gold">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-white font-bold text-lg">
@@ -379,7 +392,8 @@ export function ProductForm() {
               Preview da Vitrine
             </h3>
             <div className="aspect-[3/4] bg-luke-dark rounded-lg overflow-hidden border border-neutral-800 relative group">
-              <InstagramCarousel images={fotosPreview} />
+              {/* Passa o array de objetos para o Carousel */}
+              <InstagramCarousel images={fotosPreviewObjects} />
 
               <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/90 to-transparent p-4 text-left pointer-events-none">
                 <p className="text-luke-gold font-bold text-lg">
