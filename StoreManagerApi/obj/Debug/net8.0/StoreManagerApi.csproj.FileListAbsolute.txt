@@ -1,11 +1,3 @@
-C:\Users\diogo\Downloads\loginha2\LukeMuke-System\StoreManagerApi\obj\Debug\net8.0\StoreManagerApi.csproj.AssemblyReference.cache
-C:\Users\diogo\Downloads\loginha2\LukeMuke-System\StoreManagerApi\obj\Debug\net8.0\StoreManagerApi.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\diogo\Downloads\loginha2\LukeMuke-System\StoreManagerApi\obj\Debug\net8.0\StoreManagerApi.AssemblyInfoInputs.cache
-C:\Users\diogo\Downloads\loginha2\LukeMuke-System\StoreManagerApi\obj\Debug\net8.0\StoreManagerApi.AssemblyInfo.cs
-C:\Users\diogo\Downloads\loginha2\LukeMuke-System\StoreManagerApi\obj\Debug\net8.0\StoreManagerApi.csproj.CoreCompileInputs.cache
-C:\Users\diogo\Downloads\loginha2\LukeMuke-System\StoreManagerApi\obj\Debug\net8.0\StoreManagerApi.MvcApplicationPartsAssemblyInfo.cs
-C:\Users\diogo\Downloads\loginha2\LukeMuke-System\StoreManagerApi\obj\Debug\net8.0\StoreManagerApi.MvcApplicationPartsAssemblyInfo.cache
-C:\Users\diogo\Downloads\loginha2\LukeMuke-System\StoreManagerApi\obj\Debug\net8.0\StoreManagerApi.sourcelink.json
 C:\Users\diogo\Downloads\loginha2\LukeMuke-System\StoreManagerApi\bin\Debug\net8.0\appsettings.Development.json
 C:\Users\diogo\Downloads\loginha2\LukeMuke-System\StoreManagerApi\bin\Debug\net8.0\appsettings.json
 C:\Users\diogo\Downloads\loginha2\LukeMuke-System\StoreManagerApi\bin\Debug\net8.0\StoreManagerApi.exe
@@ -98,6 +90,14 @@ C:\Users\diogo\Downloads\loginha2\LukeMuke-System\StoreManagerApi\bin\Debug\net8
 C:\Users\diogo\Downloads\loginha2\LukeMuke-System\StoreManagerApi\bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.Workspaces.resources.dll
 C:\Users\diogo\Downloads\loginha2\LukeMuke-System\StoreManagerApi\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.resources.dll
 C:\Users\diogo\Downloads\loginha2\LukeMuke-System\StoreManagerApi\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\diogo\Downloads\loginha2\LukeMuke-System\StoreManagerApi\obj\Debug\net8.0\StoreManagerApi.csproj.AssemblyReference.cache
+C:\Users\diogo\Downloads\loginha2\LukeMuke-System\StoreManagerApi\obj\Debug\net8.0\StoreManagerApi.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\diogo\Downloads\loginha2\LukeMuke-System\StoreManagerApi\obj\Debug\net8.0\StoreManagerApi.AssemblyInfoInputs.cache
+C:\Users\diogo\Downloads\loginha2\LukeMuke-System\StoreManagerApi\obj\Debug\net8.0\StoreManagerApi.AssemblyInfo.cs
+C:\Users\diogo\Downloads\loginha2\LukeMuke-System\StoreManagerApi\obj\Debug\net8.0\StoreManagerApi.csproj.CoreCompileInputs.cache
+C:\Users\diogo\Downloads\loginha2\LukeMuke-System\StoreManagerApi\obj\Debug\net8.0\StoreManagerApi.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\diogo\Downloads\loginha2\LukeMuke-System\StoreManagerApi\obj\Debug\net8.0\StoreManagerApi.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\diogo\Downloads\loginha2\LukeMuke-System\StoreManagerApi\obj\Debug\net8.0\StoreManagerApi.sourcelink.json
 C:\Users\diogo\Downloads\loginha2\LukeMuke-System\StoreManagerApi\obj\Debug\net8.0\staticwebassets.build.json
 C:\Users\diogo\Downloads\loginha2\LukeMuke-System\StoreManagerApi\obj\Debug\net8.0\staticwebassets.development.json
 C:\Users\diogo\Downloads\loginha2\LukeMuke-System\StoreManagerApi\obj\Debug\net8.0\staticwebassets\msbuild.StoreManagerApi.Microsoft.AspNetCore.StaticWebAssets.props
