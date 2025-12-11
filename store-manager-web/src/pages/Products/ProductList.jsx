@@ -1,15 +1,12 @@
 import { useEffect, useState } from "react";
 import { PrivateLayout } from "../../components/layout/PrivateLayout";
-// Importa o ícone do Instagram
-import { Plus, Search, Edit2, Trash2, Package, Instagram } from "lucide-react"; 
+import { Plus, Search, Edit2, Trash2, Package } from "lucide-react";
 import { Link } from "react-router-dom";
 import { api } from "../../services/api";
 
 export function ProductList() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  // ⚠️ NOVO ESTADO: Armazena a categoria selecionada (padrão 'Todos')
-  const [selectedCategory, setSelectedCategory] = useState('Todos');
 
   // Função para carregar produtos
   async function loadProducts() {
@@ -27,7 +24,7 @@ export function ProductList() {
     loadProducts();
   }, []);
 
-  // --- FUNÇÃO DE DELETAR (MANTIDA) ---
+  // --- FUNÇÃO DE DELETAR ---
   async function handleDelete(id) {
     const confirmacao = window.confirm(
       "Tem certeza que deseja excluir este produto?"
@@ -35,8 +32,12 @@ export function ProductList() {
 
     if (confirmacao) {
       try {
+        // Chama a API para deletar no banco
         await api.delete(`/produtos/${id}`);
+
+        // Remove o item da tela instantaneamente
         setProducts(products.filter((product) => product.id !== id));
+
         alert("Produto excluído com sucesso!");
       } catch (error) {
         console.error("Erro ao deletar:", error);
@@ -46,15 +47,6 @@ export function ProductList() {
       }
     }
   }
-  
-  // ⚠️ CATEGORIAS PARA OS BOTÕES
-  const categories = ['Todos', 'Camisas', 'Shorts', 'Regata'];
-
-  // ⚠️ CÁLCULO: Filtra a lista de produtos baseada na categoria
-  const filteredProducts = selectedCategory === 'Todos'
-    ? products
-    : products.filter(product => (product.categoria || product.Categoria) === selectedCategory);
-
 
   return (
     <PrivateLayout>
@@ -64,18 +56,6 @@ export function ProductList() {
           <p className="text-neutral-400 mt-1">Gerencie o estoque do atelier</p>
         </div>
 
-        {/* 🎯 LINK DO INSTAGRAM AQUI (Fica ao lado do título 'Produtos') */}
-        <a
-            href="https://www.instagram.com/[SEU_USUARIO]" // ⚠️ COLOQUE O LINK CORRETO DA SUA LOJA!
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-neutral-400 hover:text-luke-gold flex items-center gap-2 transition-colors md:order-last md:ml-4"
-            title="Ver Instagram da Loja"
-        >
-            <Instagram className="w-5 h-5" />
-            Instagram da Loja
-        </a>
-
         <Link
           to="/products/new"
           className="bg-luke-gold text-luke-dark font-bold py-2.5 px-6 rounded-lg hover:bg-luke-gold-light transition-colors flex items-center gap-2 shadow-lg shadow-luke-gold/20"
@@ -84,23 +64,6 @@ export function ProductList() {
           Novo Produto
         </Link>
       </div>
-
-      {/* 🏷️ FILTROS DE CATEGORIA AQUI (SEÇÕES) */}
-      <div className="flex gap-4 mb-6 overflow-x-auto pb-2">
-        {categories.map(category => (
-            <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-colors 
-                            ${selectedCategory === category 
-                                ? 'bg-luke-gold text-luke-dark shadow-md' 
-                                : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'}`}
-            >
-                {category}
-            </button>
-        ))}
-      </div>
-
 
       <div className="bg-luke-card p-4 rounded-xl border border-neutral-800 mb-6 flex gap-4">
         <div className="relative flex-1">
@@ -117,11 +80,7 @@ export function ProductList() {
         <div className="overflow-x-auto">
           {loading ? (
             <div className="p-8 text-center text-white">Carregando...</div>
-          ) : filteredProducts.length === 0 ? (
-                <div className="p-8 text-center text-neutral-500">
-                    Nenhum produto encontrado na categoria {selectedCategory}.
-                </div>
-           ) : (
+          ) : (
             <table className="w-full text-left">
               <thead className="bg-neutral-900/50 text-luke-gold uppercase text-xs tracking-wider font-medium">
                 <tr>
@@ -133,8 +92,7 @@ export function ProductList() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-800">
-                {/* ⚠️ MAPEIA A LISTA FILTRADA */}
-                {filteredProducts.map((product) => (
+                {products.map((product) => (
                   <tr
                     key={product.id}
                     className="hover:bg-neutral-800/50 transition-colors group"
