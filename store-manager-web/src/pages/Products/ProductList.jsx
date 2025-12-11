@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { PrivateLayout } from "../../components/layout/PrivateLayout";
 // Importa o ícone do Instagram
