@@ -5,7 +5,8 @@ import { api } from "../../services/api";
 
 export function Vitrine() {
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [cart, setCart] = useState([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
   // NOVO ESTADO: Filtro de seção
   const [selectedCategory, setSelectedCategory] = useState('Todos');
 
@@ -19,7 +20,9 @@ export function Vitrine() {
 
 
   useEffect(() => {
-    api.get("/produtos").then((res) => setProducts(res.data)).finally(() => setLoading(false));
+    api.get("/produtos").then((res) => setProducts(res.data)).finally(() => {
+      // ⚠️ Note: Este finally é usado apenas para debug, não é estritamente necessário.
+    });
   }, []);
 
   // Adicionar ao carrinho
