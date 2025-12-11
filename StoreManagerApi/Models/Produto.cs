@@ -6,26 +6,26 @@ namespace StoreManagerApi.Models;
 
 public class Produto
 {
-    public int Id { get; set; }
-    
-    public string Nome { get; set; } = string.Empty;
-    
-    public string Categoria { get; set; } = string.Empty;
+    public int Id { get; set; }
+    
+    public string Nome { get; set; } = string.Empty;
+    
+    public string Categoria { get; set; } = string.Empty;
 
-    [Column(TypeName = "decimal(18,2)")]
-    public decimal PrecoCusto { get; set; }
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal PrecoCusto { get; set; }
 
-    [Column(TypeName = "decimal(18,2)")]
-    public decimal PrecoVenda { get; set; }
-    
-    // ⚠️ CORREÇÃO CRÍTICA: Ignora este campo ao receber o JSON do React.
-    // Isso evita que a string 'FotoUrl' (a capa) sobrescreva a coleção 'Fotos'.
-    [JsonIgnore] 
-    public string? FotoUrl { get; set; } 
-    
-    // NOVA LISTA: Onde ficam todas as fotos do carrossel
-    public List<ProdutoFoto> Fotos { get; set; } = new();
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal PrecoVenda { get; set; }
+    
+    // OS QUATRO CAMPOS FIXOS (URLs SIMPLES)
+    public string? FotoUrl { get; set; } // 1ª Foto
+    public string? FotoSecundariaUrl { get; set; } // 2ª Foto
+    public string? FotoTerciariaUrl { get; set; } // 3ª Foto
+    public string? FotoQuartaUrl { get; set; } // 4ª Foto
 
-    // Relacionamento com Variantes (que já existia)
-    public List<Variante> Variantes { get; set; } = new();
+    // ⚠️ ATENÇÃO: A LISTA 'Fotos' E A CLASSE 'ProdutoFoto' FORAM REMOVIDAS DO PROJETO.
+
+    // Relacionamento com Variantes (mantido)
+    public List<Variante> Variantes { get; set; } = new();
 }
