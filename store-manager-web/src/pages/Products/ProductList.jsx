@@ -1,6 +1,16 @@
+Eu sinto muito por você ainda estar vendo essa falha! É extremamente frustrante. Já que a migração está parada por problemas de sincronização de arquivos, vamos focar nas suas novas prioridades no Frontend (React) e usar o código que você me enviou.
+
+O código abaixo é a versão final e corrigida do ProductList.jsx para adicionar o link do Instagram e os botões de filtro para suas seções ("Camisas", "Shorts", "Regata").
+
+📄 ProductList.jsx Corrigido (Link Insta + Filtros)
+Substitua o conteúdo completo do seu arquivo ProductList.jsx por este código.
+
+JavaScript
+
 import { useEffect, useState } from "react";
 import { PrivateLayout } from "../../components/layout/PrivateLayout";
-import { Plus, Search, Edit2, Trash2, Package, Instagram } from "lucide-react";
+// Importa o ícone do Instagram
+import { Plus, Search, Edit2, Trash2, Package, Instagram } from "lucide-react"; 
 import { Link } from "react-router-dom";
 import { api } from "../../services/api";
 
@@ -46,13 +56,13 @@ export function ProductList() {
     }
   }
   
-  // ⚠️ NOVO CÁLCULO: Filtra a lista de produtos
+  // ⚠️ CATEGORIAS PARA OS BOTÕES
+  const categories = ['Todos', 'Camisas', 'Shorts', 'Regata'];
+
+  // ⚠️ CÁLCULO: Filtra a lista de produtos baseada na categoria
   const filteredProducts = selectedCategory === 'Todos'
     ? products
     : products.filter(product => (product.categoria || product.Categoria) === selectedCategory);
-
-  // ⚠️ Lista de categorias para os botões (Incluindo a nova 'Regata')
-  const categories = ['Todos', 'Camisas', 'Shorts', 'Regata'];
 
 
   return (
@@ -63,16 +73,16 @@ export function ProductList() {
           <p className="text-neutral-400 mt-1">Gerencie o estoque do atelier</p>
         </div>
 
-        {/* 🎯 LINK DO INSTAGRAM NA VITRINE */}
+        {/* 🎯 LINK DO INSTAGRAM (Adicionado aqui) */}
         <a
-            href="https://www.instagram.com/diogocoding" // ⚠️ ATUALIZE ESTE LINK!
+            href="https://www.instagram.com/[SEU_USUARIO]" // ⚠️ COLOQUE O LINK CORRETO DA SUA LOJA!
             target="_blank"
             rel="noopener noreferrer"
-            className="text-neutral-400 hover:text-luke-gold flex items-center gap-2 transition-colors"
+            className="text-neutral-400 hover:text-luke-gold flex items-center gap-2 transition-colors md:order-last md:ml-4"
             title="Ver Instagram da Loja"
         >
             <Instagram className="w-5 h-5" />
-            @LukeMukeOficial
+            Instagram da Loja
         </a>
 
         <Link
@@ -84,7 +94,7 @@ export function ProductList() {
         </Link>
       </div>
 
-      {/* 🏷️ FILTROS DE CATEGORIA */}
+      {/* 🏷️ FILTROS DE CATEGORIA (Adicionado aqui) */}
       <div className="flex gap-4 mb-6 overflow-x-auto pb-2">
         {categories.map(category => (
             <button
@@ -132,6 +142,7 @@ export function ProductList() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-800">
+                {/* ⚠️ MAPEIA A LISTA FILTRADA */}
                 {filteredProducts.map((product) => (
                   <tr
                     key={product.id}
@@ -171,7 +182,7 @@ export function ProductList() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        {/* --- BOTÃO DE EDITAR ATUALIZADO (LINK) --- */}
+                        {/* --- BOTÃO DE EDITAR --- */}
                         <Link
                           to={`/products/edit/${product.id || product.Id}`}
                           className="p-2 text-neutral-400 hover:text-luke-gold hover:bg-luke-gold/10 rounded-lg transition-colors"
@@ -189,7 +200,6 @@ export function ProductList() {
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
-                      
                     </td>
                   </tr>
                 ))}
